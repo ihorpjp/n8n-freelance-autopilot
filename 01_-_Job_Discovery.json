@@ -1,0 +1,614 @@
+{
+  "name": "01 - Job Discovery",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        176
+      ],
+      "id": "0256afb8-525a-406e-a3b1-ac7690470363",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=n8n+automation+freelance+remote&num=10&tbs=qdr:d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        176
+      ],
+      "id": "e81eb37d-fb5f-48af-98c5-716eb3dffac2",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allInputs = $input.all();\nconst items = [];\n\nfor (const input of allInputs) {\n  const data = input.json;\n  \n  if (data.organic_results) {\n    for (const item of data.organic_results) {\n      items.push({\n        json: {\n          title: item.title || '',\n          link: item.link || '',\n          snippet: item.snippet || '',\n          source: item.source || 'Google',\n          date: item.date || ''\n        }\n      });\n    }\n  } else if (data.title && data.url) {\n    items.push({\n      json: {\n        title: data.title || '',\n        link: data.url || '',\n        snippet: data.description || '',\n        source: 'Upwork',\n        date: data.postedAt || ''\n      }\n    });\n  } else if (Array.isArray(data)) {\n    for (const item of data) {\n      if (item.title) {\n        items.push({\n          json: {\n            title: item.title || '',\n            link: item.url || '',\n            snippet: item.description || '',\n            source: 'Upwork',\n            date: item.postedAt || ''\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        176
+      ],
+      "id": "1fd54f65-5bda-4ebd-bb07-639fdc64b8de",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={\"model\":\"llama-3.1-8b-instant\",\"messages\":[{\"role\":\"user\",\"content\":\"Score this job 1-10 for n8n freelancer student. Small project/fixed price = high score, full-time = max 4, US-only = score 1. Reply ONLY with valid JSON: {\\\"score\\\":7,\\\"reason\\\":\\\"short reason\\\",\\\"is_freelance\\\":true}. Job title: {{ $('Code in JavaScript').first().json.title }}\"}]}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        176
+      ],
+      "id": "0c3e4efb-bed2-4a08-9fc7-d1c81b7ea190",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🔥 Новая вакансия найдена!\n\n📌 {{ $('Code in JavaScript').first().json.title }}\n🔗 {{ $('Code in JavaScript').first().json.link }}\n📝 {{ $('Code in JavaScript').first().json.snippet }}\n🌐 {{ $('Code in JavaScript').first().json.source }}\n🤖 Оценка AI: {{ JSON.parse($json.choices[0].message.content).score }}/10\n💡 {{ JSON.parse($json.choices[0].message.content).reason }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        176
+      ],
+      "id": "772cb62b-fcb1-4434-b050-cd473fb37ea2",
+      "name": "Send a text message",
+      "webhookId": "6d8df955-4003-498e-9a07-7e7288eb38bf",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "jobs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('Code in JavaScript').first().json.title }}"
+            },
+            {
+              "fieldId": "url",
+              "fieldValue": "={{ $('Code in JavaScript').first().json.link }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $('Code in JavaScript').first().json.snippet }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $('Code in JavaScript').first().json.source }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        976,
+        176
+      ],
+      "id": "2afe6590-4953-49d1-8216-f28dc0997ce1",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "175798f9-bce5-4681-9d5f-d8831583dabe",
+              "leftValue": "={{ JSON.parse($json.choices[0].message.content).score }}",
+              "rightValue": 7,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        176
+      ],
+      "id": "d5a6877e-8ee3-4e5b-b663-c04431950257",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "url",
+              "condition": "eq",
+              "keyValue": "={{ $json.link }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        288,
+        176
+      ],
+      "id": "b3a06cae-99a3-476b-863b-57e66cfab814",
+      "name": "Get many rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=automatisation+workflow+freelance+mission&num=10&tbs=qdr:d&gl=fr&hl=fr&location=France",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        336
+      ],
+      "id": "29f424f9-7741-48e3-9d16-d0f496019677",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/devcake~upwork-jobs-scraper/runs?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"searchQueries\": [\"n8n automation\", \"workflow automation freelance\", \"AI automation\"],\n  \"resultsPerQuery\": 10\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fe748b26-80b8-47b9-adc9-baf965d0c309",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        0
+      ],
+      "id": "8e0c5349-f369-46a8-8ff0-598d0bb1d2d1",
+      "name": "Wait",
+      "webhookId": "3fa3905f-dab5-477a-b6d2-11472d9cd893"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/devcake~upwork-jobs-scraper/runs/last/dataset/items?token=YOUR_APIFY_TOKEN&limit=30",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        288,
+        0
+      ],
+      "id": "d7236b46-305a-43aa-ba5e-75d4a726053c",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=site:reddit.com/r/forhire+n8n+automation+OR+workflow+automation&num=10&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        464
+      ],
+      "id": "dd2c16f2-5682-45f8-958c-1321e3d2493c",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=mission+freelance+automatisation+n8n+luxembourg+OR+belgique+OR+france&num=10&gl=fr&hl=fr&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        608
+      ],
+      "id": "bcfd7927-9b6a-4339-a150-2f83f03ea561",
+      "name": "HTTP Request6"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=site:freelancer.com/projects+n8n+automation+OR+workflow+automation&num=10&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        736
+      ],
+      "id": "f1a15318-6b05-4074-b1a7-ffe74fc51381",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=site:linkedin.com/jobs+n8n+automation+freelance+remote&num=10&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        864
+      ],
+      "id": "068c2815-cbc5-4ae4-9379-3aa532c2eec7",
+      "name": "HTTP Request8"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=site:weworkremotely.com+automation+n8n+OR+workflow&num=10&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        976
+      ],
+      "id": "4cdee34f-929d-4034-867c-cd0731cfc4bc",
+      "name": "HTTP Request9"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=site:wellfound.com+automation+engineer+freelance&num=10&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        1088
+      ],
+      "id": "cfc6150f-3f3a-467a-84ee-0a11f37eb3b0",
+      "name": "HTTP Request10"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=site:producthunt.com+automation+n8n+hire&num=10&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        1216
+      ],
+      "id": "c9b59558-f22a-4dc2-b9db-00cd35b5ef9f",
+      "name": "HTTP Request12"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request8",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request9",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request10",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request7": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request8": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request9": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request10": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request12": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1e56cc4d-98ac-4878-9ed2-c6bbd11f0941",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+  },
+  "nodeGroups": [],
+  "id": "tmfE0DaMNYzHzWua",
+  "tags": []
+}

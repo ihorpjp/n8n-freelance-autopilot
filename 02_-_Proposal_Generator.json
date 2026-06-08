@@ -1,0 +1,1391 @@
+{
+  "name": "02 - Proposal Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -480,
+        240
+      ],
+      "id": "11df9d1a-07a1-417d-a254-85edd2174ac4",
+      "name": "Telegram Trigger",
+      "webhookId": "583ef891-3c91-437f-8825-d06735d4cf28",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "url",
+              "condition": "eq",
+              "keyValue": "={{ $json.message.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        128
+      ],
+      "id": "631a8269-dedc-4143-98da-c5011fbc54ca",
+      "name": "Get many rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"llama-3.1-8b-instant\",\"messages\":[{\"role\":\"user\",\"content\":\"You are Ihor, a 17-year-old IT student from Luxembourg specializing in automation. Write a SHORT professional proposal for this job:\\n\\nJob: {{ $('Get many rows').first().json.title }}\\n\\nYour real background:\\n- Built n8n automation system with Telegram bot, AI scoring, Supabase database\\n- Docker monitoring stack on Raspberry Pi (Prometheus + Grafana)\\n- 14 Cisco Academy certifications\\n- TryHackMe SOC Level 1\\n- IT Support experience at Rozetka\\n\\nRules:\\n- Be honest about being a student\\n- Mention 1-2 relevant projects naturally\\n- Offer a small test task\\n- Keep it under 100 words per language\\n- Sound human, not AI\\n- Sign as Ihor\\n\\nWrite in English only. Make it sound genuine and personal.\"}]}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        128
+      ],
+      "id": "ad15ed8e-35f1-4c1e-ba10-9d1d7245ac6b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=✍️ Готовый пропозал: {{ $json.choices[0].message.content.substring(0, 3500) }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        128
+      ],
+      "id": "fc5ecfab-cb10-4d17-866d-e78a343a6df5",
+      "name": "Send a text message",
+      "webhookId": "63719196-da40-40a7-8605-b42537e3bb34",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/add",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "2c904e70-799f-4598-a150-25a6a29fcab2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "add_client"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f7460483-bea6-46e8-8082-0c25ace67a78",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/list",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "list_clients"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c3b4b737-3a53-4a3d-8497-f9437c14e1d3",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "http",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "proposal"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "da525682-909e-4dbd-9208-f18becfb0b12",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/jobs",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "jobs"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b0637e95-f069-4e92-a8b3-25a97735075a",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/clients",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "clients"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "22bf3ad6-2d96-4232-bcb7-4581c90348fb",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/stats",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "stats"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0a0617b3-6c93-4815-a760-a9d73dfc1a7f",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "menu"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1152fae8-025a-4ba9-869e-6cb0facd04a6",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/learn",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "learn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1daa6033-b1c9-4bff-b4a4-2ae214591279",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/portfolio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "portfolio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b611101a-13c6-422c-adeb-3114cbe373f0",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/dashboard",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "dashboard"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c338dde6-b984-4f41-aba9-2e7dfd42fb73",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/upwork",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "upwork"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b5f734ce-b2b9-4b6f-845c-d48cd7b053fa",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/malt",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "malt"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fb1d6742-a839-44b1-8538-082a7dbbc435",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/sent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "sent"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -272,
+        112
+      ],
+      "id": "f248085f-02f4-45c8-b20d-9f685d5e5723",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "🤖 Freelance Hunter Bot  Выберите команду:  📋 /jobs — последние вакансии ✍️ Отправь ссылку — получи пропозал 👥 /clients — список клиентов ➕ /add Имя Компания email — добавить клиента 📊 /stats — статистика 📚 /learn [навык] — roadmap обучения",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        528
+      ],
+      "id": "4e392d87-ba4f-4ffa-8298-95d3ae5d117b",
+      "name": "Send a text message1",
+      "webhookId": "daea1eff-5298-4c33-a99c-b57e6ce4c953",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jobs",
+        "limit": 5,
+        "orderBy": "found_at.desc"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        400
+      ],
+      "id": "87961379-5fad-470d-a778-fb9cdcdd77fb",
+      "name": "Get many rows1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=📋 Последние вакансии:\n\n📌 {{ $json.title }}\n🔗 {{ $json.url }}\n⭐ Score: {{ $json.score }}/10\n📅 {{ $json.found_at }}\n\n---",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        400
+      ],
+      "id": "d75363e2-6da7-4e0c-a8f9-18df32034d21",
+      "name": "Send a text message2",
+      "webhookId": "992d028b-ded9-4c5b-bb03-a4402508d895",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clients"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        272
+      ],
+      "id": "8c68e8ca-6756-4e4c-ae28-796341b7300f",
+      "name": "Get many rows2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=👥 Ваши клиенты:  👤 {{ $json.name }} 🏢 {{ $json.company }} 📧 {{ $json.email }} 📊 Статус: {{ $json.status }} 📅 Follow-up: {{ $json.next_followup }}  ---",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        272
+      ],
+      "id": "e2c6ce49-e2dc-4aa3-8ce8-499947ddcfcf",
+      "name": "Send a text message3",
+      "webhookId": "8d0de96f-447d-4ffa-879c-0b32f429ab78",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jobs"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        656
+      ],
+      "id": "733f75cc-fd4f-4e72-a3b5-f19fa9ab48c6",
+      "name": "Get many rows3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const jobs = $input.all();\nconst total = jobs.length;\nconst scored = jobs.filter(j => j.json.score >= 7).length;\nconst avgScore = jobs.reduce((sum, j) => sum + (j.json.score || 0), 0) / total;\n\nreturn [{\n  json: {\n    total,\n    scored,\n    avgScore: avgScore.toFixed(1)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        656
+      ],
+      "id": "c51f04b2-9aa9-447e-8f36-53c610d016b1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🤖 Freelance Hunter Bot\n\nВыберите команду:\n\n📋 /jobs — последние вакансии\n✍️ Отправь ссылку — получи пропозал\n👥 /clients — список клиентов\n➕ /add Имя Компания email — добавить клиента\n📊 /dashboard — личная статистика\n💼 /portfolio — портфолио\n📚 /learn [навык] — roadmap обучения\n📈 /stats — статистика за день\n🔍 /upwork — вакансии Upwork\n🇫🇷 /malt — вакансии французского рынка\n📨 /sent — отправленные пропозалы",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        656
+      ],
+      "id": "8b78ee93-6266-4f6c-bcd3-7ad7d6566cf9",
+      "name": "Send a text message4",
+      "webhookId": "d52d0620-df00-4a90-9631-7cbebfc6c7ae",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.message.text;\n// Формат: /add Имя Компания email\nconst parts = text.split(' ');\nparts.shift(); // убираем /add\n\nreturn [{\n  json: {\n    name: parts[0] || 'Без имени',\n    company: parts[1] || 'Без компании',\n    email: parts[2] || '',\n    status: 'lead',\n    next_followup: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "016f0fa3-ad94-42ae-8655-513b4805d9ad",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "tableId": "clients",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "company",
+              "fieldValue": "={{ $json.company }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "next_followup",
+              "fieldValue": "={{ $json.next_followup }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3861d588-4c8b-4199-9ce4-fce3c3e170dc",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=✅ Клиент добавлен!  👤 {{ $json.name }} 🏢 {{ $json.company }} 📧 {{ $json.email }} 📅 Follow-up через 3 дня",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "52d574fb-cb47-42d4-b47c-b3614541dff6",
+      "name": "Send a text message5",
+      "webhookId": "41ee3eef-a7f7-4326-b970-592f7c8e679c",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Пользователь хочет изучить навык: {{ $json.message.text.replace('/learn ', '') }}\\n\\nСоздай learning roadmap на русском:\\n1. Что нужно знать\\n2. Бесплатные ресурсы\\n3. YouTube каналы\\n4. Сколько времени нужно\\n5. Как применить в n8n автоматизации\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        800
+      ],
+      "id": "1ed50190-9fb6-4e84-b853-60facb3c1b27",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=📚 Learning Roadmap  {{ $json.choices[0].message.content }}\n\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        800
+      ],
+      "id": "39598618-d0a0-4721-81a8-33e613891cee",
+      "name": "Send a text message6",
+      "webhookId": "06271561-5735-4631-8445-0ffb228c57cf",
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "won"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        992
+      ],
+      "id": "1e9659a1-4d74-471e-92a2-e10215bf1a75",
+      "name": "Get many rows4",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=💼 Ваше портфолио:  📌 {{ $json.title }} 🔗 {{ $json.url }} 📝 {{ $json.description }} ✅ Статус: {{ $json.status }}  ---",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        992
+      ],
+      "id": "2c7e1a1a-69bc-4274-9fd8-8426703e5823",
+      "name": "Send a text message7",
+      "webhookId": "be2478d4-89c1-4325-b2db-47de7c27ae6e",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jobs"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1184
+      ],
+      "id": "267c6924-b274-4e58-b6de-2d71378bdd3d",
+      "name": "Get many rows5",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clients"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        1184
+      ],
+      "id": "c12ad059-251b-4d4a-929f-a7c87d7d3936",
+      "name": "Get many rows6",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\nconst jobs = allItems.filter(i => i.json.url !== undefined);\nconst clients = allItems.filter(i => i.json.email !== undefined);\n\nconst totalJobs = jobs.length;\nconst highScore = jobs.filter(j => j.json.score >= 7).length;\nconst wonJobs = jobs.filter(j => j.json.status === 'won').length;\nconst totalClients = clients.length;\nconst activeClients = clients.filter(c => c.json.status === 'active').length;\n\nreturn [{\n  json: {\n    totalJobs,\n    highScore,\n    wonJobs,\n    totalClients,\n    activeClients\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        1184
+      ],
+      "id": "6080420a-52a0-41a1-b1f6-71586c137d63",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=📊 Личный Dashboard  🔍 Найдено вакансий: {{ $json.totalJobs }} ⭐ С оценкой 7+: {{ $json.highScore }} 🏆 Выиграно проектов: {{ $json.wonJobs }}  👥 Клиентов в CRM: {{ $json.totalClients }} ✅ Активных клиентов: {{ $json.activeClients }}  💪 Дальше меньше!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        1184
+      ],
+      "id": "11e1214c-ec9a-457b-b514-7485487048ee",
+      "name": "Send a text message8",
+      "webhookId": "4d2a3271-2778-4683-b010-b720bc253301",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/devcake~upwork-jobs-scraper/runs?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "{\"searchQueries\":[\"n8n automation freelance\",\"workflow automation small project\",\"AI automation fixed price\"],\"resultsPerQuery\":5}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        1360
+      ],
+      "id": "f26d775e-8b17-4671-b806-40c1898d27fa",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        1360
+      ],
+      "id": "10d121ab-b607-4486-8c31-690108ae0dfb",
+      "name": "Wait",
+      "webhookId": "16917786-9e88-4abd-9f24-a09299e6848b"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/devcake~upwork-jobs-scraper/runs/last/dataset/items?token=YOUR_APIFY_TOKEN&limit=5",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        1360
+      ],
+      "id": "24582e73-12fb-497c-a98d-7b40d233cfdf",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🔍 Свежие вакансии Upwork:  📌 {{ $json.title }} 🔗 {{ $json.url }} 💰 {{ $json.hourlyRateLow }}-{{ $json.hourlyRateHigh }}/hr 📝 {{ $json.description }}  ---",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        1360
+      ],
+      "id": "8a8fc11f-6308-439d-9ba8-d2b31fe64f9c",
+      "name": "Send a text message9",
+      "webhookId": "6f3ae888-56a3-4bad-b0f7-0e3ddeb2a734",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?api_key=YOUR_SERPAPI_KEY&engine=google&q=offre+mission+freelance+automatisation+n8n+france&num=10&gl=fr&hl=fr&tbs=qdr:w",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        1520
+      ],
+      "id": "85603b27-7e0a-4dc8-b91b-6cebd76f5705",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.first().json.organic_results || [];\n\nreturn items.map(item => ({\n  json: {\n    title: item.title || '',\n    link: item.link || '',\n    snippet: item.snippet || '',\n    source: item.source || 'Google FR'\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        1520
+      ],
+      "id": "5e880c6b-d714-4b9d-a54f-f9cc97361f8f",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🇫🇷 Mission freelance France:  📌 {{ $json.title }} 🔗 {{ $json.link }} 📝 {{ $json.snippet }} 🌐 {{ $json.source }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        1520
+      ],
+      "id": "fb6f42b2-91b9-4db1-85af-65daf0946f71",
+      "name": "Send a text message10",
+      "webhookId": "fc056d48-c194-4b62-a91c-4cc85acc24b3",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "proposals",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "job_id",
+              "fieldValue": "={{ $('Get many rows').first().json.id }}"
+            },
+            {
+              "fieldId": "content",
+              "fieldValue": "={{ $json.choices[0].message.content.substring(0, 1000) }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        640,
+        128
+      ],
+      "id": "e0e05d5c-7ff6-41df-8447-e65726f1b642",
+      "name": "Create a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "proposals",
+        "limit": 5
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -128
+      ],
+      "id": "bf9dc19e-0a9f-4e2b-8975-feb3b13b8891",
+      "name": "Get many rows7",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=📨 Последние пропозалы:  📝 {{ $json.content.substring(0, 200) }}... 📅 {{ $json.created_at }}  ---",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        -128
+      ],
+      "id": "27e4819a-bb31-48c7-9278-163918e13550",
+      "name": "Send a text message11",
+      "webhookId": "5b10529f-2b6e-4909-88dd-eee585397f86",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many rows1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many rows2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many rows3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many rows4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many rows5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many rows7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Send a text message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows4": {
+      "main": [
+        [
+          {
+            "node": "Send a text message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows5": {
+      "main": [
+        [
+          {
+            "node": "Get many rows6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Create a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows7": {
+      "main": [
+        [
+          {
+            "node": "Send a text message11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "61bddac7-e07a-42d8-811d-798856e5f92b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+  },
+  "nodeGroups": [],
+  "id": "fSuqWvC5eXsbmvA1",
+  "tags": []
+}

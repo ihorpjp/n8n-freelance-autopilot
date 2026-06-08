@@ -1,0 +1,114 @@
+{
+  "name": "03 - Follow Up Reminders",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 3,
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9342a520-56c0-4d5a-8f83-c3b5ca8b50ae",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clients",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "next_followup",
+              "condition": "lte",
+              "keyValue": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a1b3028b-6e1b-46b3-810d-d6f92c658ba6",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⏰ Напоминание о follow-up!  👤 Клиент: {{ $json.name }} 🏢 Компания: {{ $json.company }} 📧 Email: {{ $json.email }} 📝 Статус: {{ $json.status }} 💬 Заметки: {{ $json.notes }}  Время написать follow-up! 🚀",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "dfa66833-59ab-45f7-9f1e-0b988a5bd7ac",
+      "name": "Send a text message",
+      "webhookId": "19e0054e-5d1c-447e-8060-31a44b894c9a",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e39c3bdc-347f-4911-8f75-4c4536e7fc47",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+  },
+  "nodeGroups": [],
+  "id": "n9bvXX09L4ZJ4slm",
+  "tags": []
+}

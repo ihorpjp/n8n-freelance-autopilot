@@ -1,0 +1,137 @@
+{
+  "name": "05 - Market Intelligence",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "db122440-a573-4f54-9f1e-b69eeaad4d70",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "found_at",
+              "condition": "gte",
+              "keyValue": "={{ new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ca56493d-efc6-472a-9d6f-2fc765d16364",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "aNovlKgePQLAAD23",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const jobs = $input.all();\nconst total = jobs.length;\nconst avgScore = total > 0 \n  ? (jobs.reduce((sum, j) => sum + (j.json.score || 0), 0) / total).toFixed(1)\n  : 0;\nconst highScore = jobs.filter(j => j.json.score >= 7).length;\n\n// Собираем все источники\nconst sources = {};\njobs.forEach(j => {\n  const src = j.json.source || 'Unknown';\n  sources[src] = (sources[src] || 0) + 1;\n});\n\nconst topSources = Object.entries(sources)\n  .sort((a, b) => b[1] - a[1])\n  .slice(0, 3)\n  .map(([src, count]) => `• ${src}: ${count}`)\n  .join('\\n');\n\nreturn [{\n  json: {\n    total,\n    avgScore,\n    highScore,\n    topSources\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        0
+      ],
+      "id": "a56dc4fc-7c42-4bdf-8552-2831aa98a6c0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=📊 Ежедневный отчёт Market Intelligence  🔍 Найдено вакансий за 24ч: {{ $json.total }} ⭐ С оценкой 7+: {{ $json.highScore }} 📈 Средний score: {{ $json.avgScore }}/10  🏆 Топ источники: {{ $json.topSources }}  Удачного дня! 🚀",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        0
+      ],
+      "id": "700a6c9b-7d38-4eeb-bdce-4a8678f68115",
+      "name": "Send a text message",
+      "webhookId": "4fca7f03-9acc-4e5f-bdb3-f29261078d94",
+      "credentials": {
+        "telegramApi": {
+          "id": "wbXFKKRBCtDhMQLg",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1fc8136c-5c84-4f6c-963b-a9135ec7da2e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+  },
+  "nodeGroups": [],
+  "id": "fuh2iLrsUxrwPmTA",
+  "tags": []
+}
