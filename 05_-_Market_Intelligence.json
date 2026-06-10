@@ -44,7 +44,7 @@
       "name": "Get many rows",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -76,10 +76,10 @@
       ],
       "id": "700a6c9b-7d38-4eeb-bdce-4a8678f68115",
       "name": "Send a text message",
-      "webhookId": "4fca7f03-9acc-4e5f-bdb3-f29261078d94",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -129,7 +129,7 @@
   "versionId": "1fc8136c-5c84-4f6c-963b-a9135ec7da2e",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+    "instanceId": "YOUR_INSTANCE_ID"
   },
   "nodeGroups": [],
   "id": "fuh2iLrsUxrwPmTA",

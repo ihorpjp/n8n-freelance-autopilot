@@ -16,10 +16,10 @@
       ],
       "id": "b1b110e7-7cb5-4e9e-8798-31637ce405b6",
       "name": "Telegram Trigger",
-      "webhookId": "243f0a6d-9043-4866-9a48-5980039d23c6",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -35,7 +35,7 @@
   "versionId": "a98d6d66-15cc-40fa-8907-cde17bb49d03",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+    "instanceId": "YOUR_INSTANCE_ID"
   },
   "nodeGroups": [],
   "id": "uMd8WgUeNCssugm0",

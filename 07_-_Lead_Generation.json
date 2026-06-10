@@ -93,10 +93,10 @@
       ],
       "id": "f46b6073-6bfe-4a9f-98f5-8367386ae250",
       "name": "Send a text message",
-      "webhookId": "a62dd799-38f7-41ee-b848-b371d95b3b7c",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -157,7 +157,7 @@
   "versionId": "8c26e1ad-914f-455b-8a32-593504daef85",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+    "instanceId": "YOUR_INSTANCE_ID"
   },
   "nodeGroups": [],
   "id": "IJcj2KkJfuqHh3vy",

@@ -16,10 +16,10 @@
       ],
       "id": "11df9d1a-07a1-417d-a254-85edd2174ac4",
       "name": "Telegram Trigger",
-      "webhookId": "583ef891-3c91-437f-8825-d06735d4cf28",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -49,7 +49,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -73,7 +73,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\"model\":\"llama-3.1-8b-instant\",\"messages\":[{\"role\":\"user\",\"content\":\"You are Ihor, a 17-year-old IT student from Luxembourg specializing in automation. Write a SHORT professional proposal for this job:\\n\\nJob: {{ $('Get many rows').first().json.title }}\\n\\nYour real background:\\n- Built n8n automation system with Telegram bot, AI scoring, Supabase database\\n- Docker monitoring stack on Raspberry Pi (Prometheus + Grafana)\\n- 14 Cisco Academy certifications\\n- TryHackMe SOC Level 1\\n- IT Support experience at Rozetka\\n\\nRules:\\n- Be honest about being a student\\n- Mention 1-2 relevant projects naturally\\n- Offer a small test task\\n- Keep it under 100 words per language\\n- Sound human, not AI\\n- Sign as Ihor\\n\\nWrite in English only. Make it sound genuine and personal.\"}]}",
+        "jsonBody": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [{\n    \"role\": \"user\",\n    \"content\": \"Generate TWO freelance proposals for this job.\\n\\nJob: {{ $('Get many rows').first().json.title }}\\n\\nBackground: n8n automation, Telegram bots, Supabase, Docker on Raspberry Pi, 14 Cisco certs, TryHackMe SOC Level 1. 17yo IT student from Luxembourg.\\n\\nFormat EXACTLY like this:\\n===A===\\n[formal proposal under 100 words, sign as Ihor]\\n===B===\\n[hook-first under 70 words, no greetings, start with client problem, sign as Ihor]\\n===END===\"\n  }]\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -88,21 +88,50 @@
     {
       "parameters": {
         "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "=✍️ Готовый пропозал: {{ $json.choices[0].message.content.substring(0, 3500) }}",
+        "text": "={{ $json.message }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅ Отправил A",
+                    "additionalFields": {
+                      "callback_data": "ab_a_test"
+                    }
+                  },
+                  {
+                    "text": "✅ Отправил B",
+                    "additionalFields": {
+                      "callback_data": "ab_b_test"
+                    }
+                  },
+                  {
+                    "text": "❌ Ни один",
+                    "additionalFields": {
+                      "callback_data": "ab_none_test"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        432,
+        624,
         128
       ],
       "id": "fc5ecfab-cb10-4d17-866d-e78a343a6df5",
       "name": "Send a text message",
-      "webhookId": "63719196-da40-40a7-8605-b42537e3bb34",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -422,6 +451,31 @@
               },
               "renameOutput": true,
               "outputKey": "sent"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c8230373-1e6e-4964-a07b-a5bc2e83338f",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "callback"
             }
           ]
         },
@@ -450,10 +504,10 @@
       ],
       "id": "4e392d87-ba4f-4ffa-8298-95d3ae5d117b",
       "name": "Send a text message1",
-      "webhookId": "daea1eff-5298-4c33-a99c-b57e6ce4c953",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -475,7 +529,7 @@
       "name": "Get many rows1",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -494,10 +548,10 @@
       ],
       "id": "d75363e2-6da7-4e0c-a8f9-18df32034d21",
       "name": "Send a text message2",
-      "webhookId": "992d028b-ded9-4c5b-bb03-a4402508d895",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -518,7 +572,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -537,10 +591,10 @@
       ],
       "id": "e2c6ce49-e2dc-4aa3-8ce8-499947ddcfcf",
       "name": "Send a text message3",
-      "webhookId": "8d0de96f-447d-4ffa-879c-0b32f429ab78",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -560,7 +614,7 @@
       "name": "Get many rows3",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -592,10 +646,10 @@
       ],
       "id": "8b78ee93-6266-4f6c-bcd3-7ad7d6566cf9",
       "name": "Send a text message4",
-      "webhookId": "d52d0620-df00-4a90-9631-7cbebfc6c7ae",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -608,7 +662,7 @@
       "typeVersion": 2,
       "position": [
         0,
-        0
+        -16
       ],
       "id": "016f0fa3-ad94-42ae-8655-513b4805d9ad",
       "name": "Code in JavaScript1"
@@ -645,13 +699,13 @@
       "typeVersion": 1,
       "position": [
         208,
-        0
+        -16
       ],
       "id": "3861d588-4c8b-4199-9ce4-fce3c3e170dc",
       "name": "Create a row",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -666,14 +720,14 @@
       "typeVersion": 1.2,
       "position": [
         416,
-        0
+        -16
       ],
       "id": "52d574fb-cb47-42d4-b47c-b3614541dff6",
       "name": "Send a text message5",
-      "webhookId": "41ee3eef-a7f7-4326-b970-592f7c8e679c",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -723,11 +777,11 @@
       ],
       "id": "39598618-d0a0-4721-81a8-33e613891cee",
       "name": "Send a text message6",
-      "webhookId": "06271561-5735-4631-8445-0ffb228c57cf",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "alwaysOutputData": false,
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -757,7 +811,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -776,10 +830,10 @@
       ],
       "id": "2c7e1a1a-69bc-4274-9fd8-8426703e5823",
       "name": "Send a text message7",
-      "webhookId": "be2478d4-89c1-4325-b2db-47de7c27ae6e",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -799,7 +853,7 @@
       "name": "Get many rows5",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -819,7 +873,7 @@
       "name": "Get many rows6",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -851,10 +905,10 @@
       ],
       "id": "11e1214c-ec9a-457b-b514-7485487048ee",
       "name": "Send a text message8",
-      "webhookId": "4d2a3271-2778-4683-b010-b720bc253301",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -890,7 +944,7 @@
       ],
       "id": "10d121ab-b607-4486-8c31-690108ae0dfb",
       "name": "Wait",
-      "webhookId": "16917786-9e88-4abd-9f24-a09299e6848b"
+      "webhookId": "YOUR_WEBHOOK_ID"
     },
     {
       "parameters": {
@@ -920,10 +974,10 @@
       ],
       "id": "8a8fc11f-6308-439d-9ba8-d2b31fe64f9c",
       "name": "Send a text message9",
-      "webhookId": "6f3ae888-56a3-4bad-b0f7-0e3ddeb2a734",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -969,10 +1023,10 @@
       ],
       "id": "fb6f42b2-91b9-4db1-85af-65daf0946f71",
       "name": "Send a text message10",
-      "webhookId": "fc056d48-c194-4b62-a91c-4cc85acc24b3",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -980,30 +1034,19 @@
     {
       "parameters": {
         "tableId": "proposals",
-        "fieldsUi": {
-          "fieldValues": [
-            {
-              "fieldId": "job_id",
-              "fieldValue": "={{ $('Get many rows').first().json.id }}"
-            },
-            {
-              "fieldId": "content",
-              "fieldValue": "={{ $json.choices[0].message.content.substring(0, 1000) }}"
-            }
-          ]
-        }
+        "dataToSend": "autoMapInputData"
       },
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        640,
+        784,
         128
       ],
       "id": "e0e05d5c-7ff6-41df-8447-e65726f1b642",
       "name": "Create a row1",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -1018,13 +1061,13 @@
       "typeVersion": 1,
       "position": [
         0,
-        -128
+        -160
       ],
       "id": "bf9dc19e-0a9f-4e2b-8975-feb3b13b8891",
       "name": "Get many rows7",
       "credentials": {
         "supabaseApi": {
-          "id": "aNovlKgePQLAAD23",
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
           "name": "Supabase account"
         }
       }
@@ -1039,15 +1082,78 @@
       "typeVersion": 1.2,
       "position": [
         208,
-        -128
+        -160
       ],
       "id": "27e4819a-bb31-48c7-9278-163918e13550",
       "name": "Send a text message11",
-      "webhookId": "5b10529f-2b6e-4909-88dd-eee585397f86",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "telegramApi": {
-          "id": "wbXFKKRBCtDhMQLg",
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
           "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.choices[0].message.content;\nconst job = $('Get many rows').first().json;\n\nconst variantA = raw.split('===A===')[1].split('===B===')[0].trim();\nconst variantB = raw.split('===B===')[1].split('===END===')[0].trim();\n\nreturn [{\n  json: {\n    job_id: job.id,\n    job_title: job.title,\n    job_url: job.url,\n    proposal_a: variantA,\n    proposal_b: variantB,\n    message: `🎯 *${job.title}*\\n🔗 ${job.url}\\n\\n*Вариант A (формальный):*\\n${variantA}\\n\\n*Вариант B (хук):*\\n${variantB}`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        128
+      ],
+      "id": "5322e67e-246e-40c5-93af-08c7f59d0fd7",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json.callback_query.data;\nconst chatId = $json.callback_query.message.chat.id;\nconst messageId = $json.callback_query.id;\n\nconst parts = data.split('_');\nconst result = parts[1]; // a, b, или none\nconst jobId = parts[2];\n\nreturn [{\n  json: {\n    job_id: jobId,\n    ab_result: result,\n    chat_id: chatId,\n    callback_id: messageId\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1680
+      ],
+      "id": "b216843c-edfe-4f32-95c1-435fd10391c0",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "proposals",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "job_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.job_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ab_result",
+              "fieldValue": "={{ $json.ab_result }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        1680
+      ],
+      "id": "f1af8da0-fe91-49e2-9a16-44b7826612aa",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+          "name": "Supabase account"
         }
       }
     }
@@ -1080,7 +1186,7 @@
       "main": [
         [
           {
-            "node": "Send a text message",
+            "node": "Code in JavaScript4",
             "type": "main",
             "index": 0
           }
@@ -1170,6 +1276,13 @@
         [
           {
             "node": "Get many rows7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript5",
             "type": "main",
             "index": 0
           }
@@ -1373,6 +1486,28 @@
           }
         ]
       ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1380,10 +1515,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "61bddac7-e07a-42d8-811d-798856e5f92b",
+  "versionId": "a69ea291-a6f2-4f56-9bd4-61742f29d22e",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "58314f940a62795a80877338880a94f00e24ae2eaf023fa596c268c403d84693"
+    "instanceId": "YOUR_INSTANCE_ID"
   },
   "nodeGroups": [],
   "id": "fSuqWvC5eXsbmvA1",
