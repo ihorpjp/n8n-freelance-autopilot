@@ -1,65 +1,67 @@
-# n8n-freelance-autopilot
-AI-powered freelance job hunting system built with n8n. Automatically finds jobs, scores them with AI, generates proposals in 3 languages, and sends Telegram alerts. Self-hosted on Raspberry Pi.
-# 🤖 n8n Freelance Autopilot
+n8n Freelance Autopilot 🤖
 
-AI-powered system that hunts freelance jobs 24/7 and generates proposals automatically.
+AI-powered job hunting system that finds freelance jobs 24/7, scores them, generates proposals in 3 languages, and sends the best ones to your Telegram — while you sleep.
 
-## 🚀 What it does
 
-- **Finds jobs** every 30 minutes from Google, Upwork, French market
-- **AI scoring** 1-10 for each job (filters full-time, US-only, low budget)
-- **Generates proposals** in 3 languages (EN, RU, FR) with risk assessment
-- **Telegram alerts** with job details and AI analysis
-- **CRM** to track clients and follow-ups
-- **Market Intelligence** daily reports
+What it does
 
-## 🛠 Tech Stack
+🔍 Scans Upwork, Malt, and Freelancer every 30 minutes
+🧠 Scores each job 0–100 with AI based on your profile
+✍️ Generates proposals in English, French, and German
+📱 Sends the best jobs to Telegram with inline A/B buttons
+📊 Tracks which proposal style gets more replies
+⏰ Reminds you to follow up after 3 days
+📈 Reports daily stats and weekly market trends
 
-- **n8n** — workflow orchestration (self-hosted)
-- **Raspberry Pi 5** — runs 24/7
-- **Docker** — containerization
-- **Supabase** — database
-- **Groq (Llama 3.1)** — AI analysis and proposal generation
-- **SerpAPI** — job search
-- **Apify** — Upwork scraping
-- **Telegram Bot API** — alerts and commands
-- **Cloudflare Tunnel** — HTTPS access
 
-## 📱 Telegram Bot Commands
+7 Workflows included
+#WorkflowSchedule01Job DiscoveryEvery 30 min02Proposal Generator (A/B)On new job03Follow-up RemindersEvery 3 days04CRM via TelegramOn demand05Market IntelligenceDaily06Trend AnalysisWeekly07Lead GenerationWeekly
 
-| Command | Description |
-|---------|-------------|
-| `/start` | Show menu |
-| `/jobs` | Latest found jobs |
-| `/upwork` | Search Upwork directly |
-| `/malt` | French market jobs |
-| `/clients` | CRM clients list |
-| `/add Name Company email` | Add client |
-| `/dashboard` | Personal stats |
-| `/stats` | Daily report |
-| `/learn [skill]` | Learning roadmap |
-| Send URL | Generate proposal |
+Tech stack
 
-## 📊 Workflows
+n8n — self-hosted workflow automation
+Groq API (Llama 3.1) — AI scoring and proposal generation
+Supabase — database and deduplication
+SerpAPI — job board search
+Apify — Upwork scraping
+Telegram Bot API — alerts and commands
+Docker — containerization
+Cloudflare Tunnel — HTTPS webhooks
 
-1. **Job Discovery** — searches multiple sources every 30 min
-2. **Proposal Generator** — AI proposals + risk assessment
-3. **Follow Up Reminders** — daily client follow-up alerts
-4. **Market Intelligence** — daily market report
-5. **Lead Generation** — weekly proactive lead search
-6. **Trend Analysis** — weekly automation trends report
+Running cost: ~$5/month in API calls. No SaaS fees.
 
-## Monthly Cost
+Telegram bot commands
+/jobs     — show latest jobs found
+/stats    — dashboard with your stats
+/learn    — weekly market intelligence report
+/clients  — manage your client list
 
-| Service | Cost |
-|---------|------|
-| SerpAPI | $0 (250 free) |
-| Groq | $0 (free) |
-| Supabase | $0 (free tier) |
-| Apify | $20 credit |
-| Raspberry Pi | One-time ~$35 |
-| **Total** | **~$0-20/month** |
+What's in this repo
+This repository contains sanitized workflow JSON files for preview purposes.
+All sensitive fields (API keys, tokens, chat IDs) have been replaced with placeholders like YOUR_GROQ_API_KEY.
+To get the full working setup including:
 
-## 🔧 Built with
+✅ Pre-configured workflow files
+✅ Step-by-step Setup Guide PDF
+✅ Raspberry Pi / VPS deployment instructions
+✅ All API connection guides
 
-n8n • Docker • Raspberry Pi • Supabase • Groq • Telegram • Cloudflare
+👉 Get it on Gumroad — €15 Early Access
+
+Requirements
+
+Raspberry Pi 3/4, VPS, or any always-on device
+Docker + Docker Compose
+Groq API key (free)
+SerpAPI key (100 free searches/month)
+Apify token (free tier)
+Supabase project (free)
+Telegram bot token
+
+
+More info
+🌐 Landing page: n8n-freelance-autopilot.netlify.app
+🛒 Get the full package: bezruchko7.gumroad.com/l/iyhuvl
+📧 Contact: ihorbezruchko5@gmail.com
+
+Built by a 17-year-old IT student from Luxembourg 🇱🇺
